@@ -1,0 +1,60 @@
+{
+    "933780685423001681": {
+        "server": 933780685423001681,
+        "homePanel": 971798687934210118,
+        "blacklist": [
+            "badword1"
+        ],
+        "strikes": {
+            "myx#0001": 1
+        },
+        "CUPS": {}
+    },
+    "939895693735239680": {
+        "server": 939895693735239680,
+        "homePanel": 971876858691977258,
+        "blacklist": [
+            "bigword1",
+            "epicword2",
+            "newword",
+            "bigword1",
+            "epicbadword1"
+        ],
+        "strikes": {
+            "yoman#6432": 0
+        },
+        "CUPS": {}
+    },
+    "951516849508614214": {
+        "server": 951516849508614214,
+        "blacklist": [
+            "badword"
+        ],
+        "strikes": {
+            "ccistudent#1117": 1,
+            "chad.exe#3740": 1
+        }
+    },
+    "951574958771949628": {
+        "server": 951574958771949628,
+        "blacklist": [
+            "badword"
+        ],
+        "strikes": {
+            "ccistudent#1117": 3,
+            "chad.exe#3740": 1
+        }
+    },
+    "960540949400928347": {
+        "server": 960540949400928347,
+        "blacklist": [
+            "word1",
+            "word2",
+            "word3",
+            "word4"
+        ],
+        "strikes": {
+            "astro.#4200": 0
+        }
+    }
+}
