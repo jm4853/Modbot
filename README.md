@@ -1,5 +1,6 @@
 # Modbot
-An in progress Discord Administrative Bot
+An in progress Discord Administrative Bot.
+
 This is a work in progress. The purpose of this bot is to implement adminstrative commands 
 to support principles of least privilege. Features include creating, removing and editing
 text/voice channels, creating, removing, and editing roles, implementing a banned words blacklist, 
