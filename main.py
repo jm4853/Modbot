@@ -217,7 +217,5 @@ async def unTempBan(ctx, user: discord.Member):
     await dspln.unTempBan(ctx, user)
 
 print("Before run")
-jakeskey = 'OTM5ODk1MzYwMzcxOTUzNzI0.Yf_fxA.lcv-XrLctUHYXuf-ZwOFiHoR9mU'
-botkey = 'Mjk1MzYzODIzOTI4MzQ0NTc2.WNcU_w.OuFwSoQlSZuTCezHieWrP_xuDiY'
-bot.run(jakeskey)
+bot.run('''Enter your bots key here''')
 print("After Run")
