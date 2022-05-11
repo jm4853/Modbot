@@ -1,47 +1,72 @@
 # Modbot.py
-# Current working copy
-# TODO:
-# - Fix uneditable features in Event Behaviors by
-#   adding new commands like "editWelcomeChannel"
-# - Format the role commands into more practical
-#   and applicable methods. This may involve reducing
-#   some to plain functions and including them inside
-#   new commands
+#
+# This project is still in progress, some features are incomplete and
+# may cause other components of the bot to raise errors.
+#
+# The purpose of this script is to handle events all call other function.
+# You can see in the imports each module that we use. The functions
+# in each module have the same name as the actual event/command that
+# they correspond to. At the bottom of this script, you will find a
+# bot.run() call. In order to use this code, you will need to create your
+# own bot applications through the Discord developer portal:
+#
+# Once you have created a bot application, you will be able to take its
+# token, and paste it into the bot.run() call. The to turn on the bot
+# simply run this file.
+#
+# Guild and server might be used interchangably throughout this code,
+# however its important to note that the correct term is guild.
+#
+# Documentation for the API wrapper:
+# https://discordpy.readthedocs.io/en/stable/
+#
+# Authors:
+# Jake Marchese
+# Joshua Kropp
+# Michael Trent
+# Nathan Kong
+# Nemanja Sajatovic 
 
 
-# Importing discord API and the discord.ext so we can use discord.py methods
+# Importing the discord API wrapper
 import discord
 import roles
 import events
 import channelbot as chnls
 import discipline as dspln
 import modFileManager as fm
+# Another component of the API wrapper that allows us to use the
+# bot.command() wrapper
 from discord.ext import commands
-print("Imports of bot")
+
 # Back up measure(s) to ensure bot has necessary tools:
 intents = discord.Intents.all()
 
 # Bot must have Intents.reactions enabled for GUI to work reliably
 # Creates bot using commands (instead of discord.client())
 bot = commands.Bot(command_prefix='$', intents=intents)
-print("Imports of bot")
+
 
 # -------------------
 # | Event Behaviors |
 # -------------------
 
+# Called when bot starts
 # Boot up message
 @bot.event
 async def on_ready():
     await events.on_ready()
 
-# Manual command function (for reference)
-# Includes $ping command
+# Called when a message is sent in any channel viewable by the bot
+# Manual command function (for reference). This is how you would have
+# to write commands withouth the commands import
+# Includes a $ping command
 @bot.event
 async def on_message(message):
     # on_message requires the bot object, so its passed in as well
     await events.on_message(message, bot)
 
+# Called whe bot joins a guild
 # Bot join's server and posts message
 @bot.event
 async def on_guild_join(guild):
@@ -64,7 +89,12 @@ async def on_member_remove(member):
 # Called whenever any reaction occurs
 # on the server. Only used to detect reactions
 # to the home panel. Must use raw reaction to avoid
-# message getting removed from bots interal cache
+# message getting removed from bots interal cache.
+# Its important to note that rawEventData is a different
+# data type than what is used in almost all other
+# bot.events, meaning functions that are called from
+# this event must be rewritten to use rawEventData.
+# More information can be found in GUIS.py
 @bot.event
 async def on_raw_reaction_add(rawEventData):
     await events.on_raw_reaction_add(rawEventData, bot)
