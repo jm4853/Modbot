@@ -7,3 +7,5 @@ text/voice channels, creating, removing, and editing roles, implementing a banne
 and creating custom emojis. In order to use this bot you will have to create a discord bot
 application through the Discord developer portal. The bot can be used by entering your Bot
 application's token and then running main.py.
+
+For support you can contact Jake at: jm4853@drexel.edu
