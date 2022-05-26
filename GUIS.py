@@ -2,6 +2,8 @@ import discord
 import modFileManager as fm
 import asyncio
 import panelDiscipline
+import panelRoles
+import channelGUI
 
 Colors = discord.Colour
 
@@ -26,7 +28,6 @@ async def purgeChannel(rawEventData, bot, *args):
     channel = bot.get_channel(rawEventData.channel_id)
     await channel.purge()
     homePanelID = await sendHomePanel(channel)
-    storeHomePanel(rawEventData.guild_id, homePanelID)
 
 def storeHomePanel(guildID, panelID):
     guildData = fm.getServerData(guildID)
@@ -102,13 +103,16 @@ async def samplePanel(rawEventData, bot):
 
 callGUI = {
     "🗒️": samplePanel,
-    "‼": panelDiscipline.disciplinePanel
+    "‼": panelDiscipline.disciplinePanel,
+    "🔒": panelRoles.rolePanel,
+    "📲": channelGUI.channelPanel
     }
 # Use this function to get the list of panel emojis
 def panelListEmojis():
         return list(callGUI.keys())
 
 async def handleGUIreactions(rawEventData, bot):
+    print(f"reacted: {rawEventData.emoji}")
     guildID = rawEventData.guild_id
     messageID = rawEventData.message_id
     emoji = rawEventData.emoji
@@ -120,11 +124,13 @@ async def handleGUIreactions(rawEventData, bot):
 
 async def sendHomePanel(channel):    
     title = "Home Panel"
-    desc = "Here you can access the other moderation panels:\n🗒  - for blacklist and strike management"
+    desc = "Here you can access the other moderation panels:\n‼ - for blacklist and strike management\n🔒 - for role management\n📲 - for channel management"
     color = Colors.dark_gold()
     
     homeEmbed = discord.Embed(title = title, description = desc, color = color)
     homePanel = await channel.send(embed = homeEmbed)
+    
+    storeHomePanel(homePanel.guild.id, homePanel.id)
     
     for emoji in panelListEmojis():
         await homePanel.add_reaction(emoji)

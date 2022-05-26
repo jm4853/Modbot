@@ -1,0 +1,14 @@
+This file contains a list of the errors that have been found and the progress of fixing them.
+
+ - Multiple Panels being opened at once:
+	Bot struggles to know which panels to react too and doesnt have any ability to realize two panels have been sent
+
+ - Getting bricked after hitting an error in a sub panel.
+	If you pass the bot an incorrect username or something similar while a panel/subpanel is open, and it causes an error, the bot will no longer respond to GUI inputs other than from the home panel. Default behaviors need to be written for when it encounters errors like this.
+
+ - If possible Panels should not send any messages.
+	Instead the messages should be appened to the descriptions of embedded messages
+
+ - A lot of the text in the panels needs to be changed, like the home panel needs to be updated with listing and giving a breif description of the panels it can call.
+
+ - Panel functions that require the user to send multiple messages should delete messages after 1 second or so. You can check the "🔨" elif in the rolesRoutine in panelRoles.py to see how I implemented it.

@@ -1,18 +1,20 @@
 {
     "933780685423001681": {
         "server": 933780685423001681,
-        "homePanel": 971798687934210118,
+        "homePanel": 979415174794575933,
         "blacklist": [
-            "badword1"
+            "badWord1",
+            "badWord2"
         ],
         "strikes": {
-            "myx#0001": 1
+            "MikeTestAcct#5895": 3,
+            "chad.exe#3740": 2
         },
         "CUPS": {}
     },
     "939895693735239680": {
         "server": 939895693735239680,
-        "homePanel": 971876858691977258,
+        "homePanel": 979458528630702131,
         "blacklist": [
             "bigword1",
             "epicword2",
@@ -21,7 +23,8 @@
             "epicbadword1"
         ],
         "strikes": {
-            "yoman#6432": 0
+            "yoman#6432": 0,
+            "chad.exe#3740": 0
         },
         "CUPS": {}
     },

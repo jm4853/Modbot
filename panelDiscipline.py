@@ -3,6 +3,7 @@ import discord
 import modFileManager as fm
 import asyncio
 import discipline as dspln
+import re 
 
 Colors = discord.Colour
 
@@ -97,6 +98,48 @@ async def blacklistRoutine(rawEventData, bot, panel):
         for emoji in reactionList:
             await panel.add_reaction(emoji)
     
+def banEmbed(guildID):
+    guildData = fm.getServerData(guildID)
+    title = "Discipline Module"
+    desc = "Here are the currently temp banned users:"
+    for user, strikes in guildData["strikes"].items():
+        if strikes == -1:
+            desc+= f"\n {user}"
+    color = Colors.dark_teal()
+    
+    banEmbed = discord.Embed(title = title, description = desc, color = color)
+    return banEmbed
+
+def banUpdatedEmbed(guildID):
+    guildData = fm.getServerData(guildID)
+    title = "Discipline Module"
+    desc = "Send the Name and Discriminator of the User you would like to Temp-Ban/Un-Temp-Ban(ex. jon#0001)."
+    color = Colors.dark_teal()
+    
+    banUpdatedEmbed = discord.Embed(title = title, description = desc, color = color)
+    return banUpdatedEmbed
+
+def muteEmbed(guildID):
+    guildData = fm.getServerData(guildID)
+    title = "Discipline Module"
+    desc = "Here are the currently muted users:"
+    for user, strikes in guildData["strikes"].items():
+        if strikes < -10:
+            desc+= f"\n {user}"
+    color = Colors.dark_teal()
+    
+    muteEmbed = discord.Embed(title = title, description = desc, color = color)
+    return muteEmbed
+
+def muteUpdatedEmbed(guildID):
+    guildData = fm.getServerData(guildID)
+    title = "Discipline Module"
+    desc = "Send the Name and Discriminator of the User you would like to Mute/Un-Mute(ex. jon#0001)."
+    color = Colors.dark_teal()
+    
+    muteUpdatedEmbed = discord.Embed(title = title, description = desc, color = color)
+    return muteUpdatedEmbed
+    
 
 def updatedStrikesEmbed(guildID):
     guildData = fm.getServerData(guildID)
@@ -152,21 +195,90 @@ async def strikesRoutine(rawEventData, bot, panel):
 
 
 async def banRoutine(rawEventData, bot, panel):
+    await panel.clear_reactions()
     guildID = rawEventData.guild_id
     channelID = rawEventData.channel_id
+    channel = bot.get_channel(rawEventData.channel_id)
+    disciplineEmbed = banEmbed(guildID)
     
+    await panel.edit(embed = disciplineEmbed)
     
-    await GUIS.purgeChannel(rawEventData, bot)
-    await disciplinePanel(rawEventData, bot)
+    reactionList  = ['🔨',  '✉', '❌']
+    for emoji in reactionList:
+        await panel.add_reaction(emoji)
+        
+    def check(reaction, user):
+        return str(reaction)== '🔨' or str(reaction) == '✉' or str(reaction) == '❌' and user != panel.author
+    
+    while True:
+        try:
+            reaction, user = await bot.wait_for('reaction_add', timeout = 60.0, check=check)
+            
+        except asyncio.TimeoutError:
+            await GUIS.purgeChannel(rawEventData, bot)
+            
+        else:
+            if str(reaction) == '🔨':
+                updatedEmbed = banUpdatedEmbed(guildID)
+                await panel.edit(embed = updatedEmbed)
+                await panelTempBan(rawEventData, bot)
+                
+            elif str(reaction) == '✉':
+                updatedEmbed = banUpdatedEmbed(guildID)
+                await panel.edit(embed = updatedEmbed)
+                await panelUnTempBan(rawEventData, bot)
+                
+            elif str(reaction) == '❌':
+                await GUIS.purgeChannel(rawEventData, bot)
+                await disciplinePanel(rawEventData, bot)
+                break
+            
+        await panel.clear_reactions()
+        await panel.edit(embed = banEmbed(guildID))
+        for emoji in reactionList:
+            await panel.add_reaction(emoji)
 
 async def muteRoutine(rawEventData, bot, panel):
+    await panel.clear_reactions()
     guildID = rawEventData.guild_id
     channelID = rawEventData.channel_id
+    disciplineEmbed = muteEmbed(guildID)
+    await panel.edit(embed = disciplineEmbed)
     
+    reactionList  = ['🔇',  '🔊', '❌']
+    for emoji in reactionList:
+        await panel.add_reaction(emoji)
+        
+    def check(reaction, user):
+        return str(reaction)== '🔇' or str(reaction) == '🔊' or str(reaction) == '❌' and user != panel.author
     
-    await GUIS.purgeChannel(rawEventData, bot)
-    await disciplinePanel(rawEventData, bot)
+    while True:
+        try:
+            reaction, user = await bot.wait_for('reaction_add', timeout = 60.0, check=check)
+            
+        except asyncio.TimeoutError:
+            await GUIS.purgeChannel(rawEventData, bot)
+            
+        else:
+            if str(reaction) == '🔇':
+                updatedMutePanel = muteUpdatedEmbed(guildID)
+                await panel.edit(embed = updatedMutePanel)
+                await panelMute(rawEventData, bot)
 
+            elif str(reaction) == '🔊':
+                updatedMutePanel = muteUpdatedEmbed(guildID)
+                await panel.edit(embed = updatedMutePanel)
+                await panelUnMute(rawEventData, bot)
+
+            elif str(reaction) == '❌':
+                await GUIS.purgeChannel(rawEventData, bot)
+                await disciplinePanel(rawEventData, bot)
+                break
+        
+        await panel.clear_reactions()
+        await panel.edit(embed = muteEmbed(guildID))
+        for emoji in reactionList:
+            await panel.add_reaction(emoji)
 
 def inServer(members, lookFor):
     for member in members:
@@ -192,11 +304,14 @@ async def panelAddStrike(rawEventData, bot):
     except asyncio.TimeoutError:
         await GUIS.purgeChannel(rawEventData, bot)
     else:
-        wordsRaw = message.content
-        parts = wordsRaw.split(" ")
-        user = parts[0]
-        userTuple = tuple(user.split("#"))
-        numberOfStrikes = int(parts[1])
+        try:
+            wordsRaw = message.content
+            parts = wordsRaw.split(" ")
+            user = parts[0]
+            userTuple = tuple(user.split("#"))
+            numberOfStrikes = int(parts[1])
+        except:
+            return
         
         # Gets server data
         server_object = fm.getServerData(guildID)
@@ -244,11 +359,14 @@ async def panelRemoveStrike(rawEventData, bot):
     except asyncio.TimeoutError:
         await GUIS.purgeChannel(rawEventData, bot)
     else:
-        wordsRaw = message.content
-        parts = wordsRaw.split(" ")
-        user = parts[0]
-        userTuple = tuple(user.split("#"))
-        numberOfStrikes = int(parts[1])
+        try:
+            wordsRaw = message.content
+            parts = wordsRaw.split(" ")
+            user = parts[0]
+            userTuple = tuple(user.split("#"))
+            numberOfStrikes = int(parts[1])
+        except:
+            return
         
         # Gets server data
         server_object = fm.getServerData(guildID)
@@ -291,7 +409,7 @@ async def panelAddWord(rawEventData, bot):
         wordsRaw = message.content
         
         # Gets server data
-        server_object = fm.getServerData(guildID)
+        server_object = fm.getServerData(guildID) 
         
         #Splits the words via spaces
         wordsList = wordsRaw.split(' ')
@@ -344,3 +462,156 @@ async def panelRemoveWord(rawEventData, bot):
 
         # Stores data
         fm.storeServerData(server_object)
+    
+    
+async def panelTempBan(rawEventData, bot):
+    channel = bot.get_channel(rawEventData.channel_id)
+    guild = bot.get_guild(rawEventData.guild_id)
+    guildID = rawEventData.guild_id
+    
+    try:
+        message = await bot.wait_for('message', timeout = 180)
+        
+    except asyncio.TimeoutError:
+        await GUIS.purgeChannel(rawEventData, bot)
+    
+    else:
+        messageContent = message.content
+        parts = re.split("#| ",messageContent)
+        userName = parts[0]
+        discriminator = parts[1]
+        user = ''
+        
+        #Fetches all members from server
+        async for member in guild.fetch_members():
+            #Checks if the current iteration of the list "member" matches the given user
+            if str(member.name) == userName and str(member.discriminator) == discriminator:
+                server_object = fm.getServerData(guildID)
+                strikeDict = server_object["strikes"]
+                user = member
+                #Sets the user's strikes to -1 after theyve been banned
+                strikeDict[str(user)] = -1
+                fm.storeServerData(server_object)
+                break
+        for channelPoint in guild.channels:
+            if isinstance(channelPoint, discord.TextChannel):
+                await channelPoint.set_permissions(user, view_channel=False)
+            elif isinstance(channelPoint, discord.VoiceChannel):
+                await channelPoint.set_permissions(user, view_channel=False)
+        await channel.send(f"{user.mention} has been temporarily banned.")    
+    
+    
+async def panelUnTempBan(rawEventData, bot):
+    channel = bot.get_channel(rawEventData.channel_id)
+    guild = bot.get_guild(rawEventData.guild_id)
+    guildID = rawEventData.guild_id
+    
+    try:
+        message = await bot.wait_for('message', timeout = 180)
+        
+    except asyncio.TimeoutError:
+        await GUIS.purgeChannel(rawEventData, bot)
+    
+    else:
+        messageContent = message.content
+        parts = re.split("#| ",messageContent)
+        userName = parts[0]
+        discriminator = parts[1]
+        user = ''
+        
+        #Fetches all Members from Server
+        async for member in guild.fetch_members():
+            #Checks if the current iteration of the list "member" matches the given user
+            if str(member.name) == userName and str(member.discriminator) == discriminator:
+                server_object = fm.getServerData(guildID)
+                strikeDict = server_object["strikes"]
+                user = member
+                #Sets the user's strikes to 2 after being un-banned
+                strikeDict[str(user)] = 2
+                #Stores the updated file
+                fm.storeServerData(server_object)
+                break
+            
+        for channelPoint in guild.channels:
+            if isinstance(channelPoint, discord.TextChannel):
+                await channelPoint.set_permissions(user, view_channel=None)
+            elif isinstance(channelPoint, discord.VoiceChannel):
+                await channelPoint.set_permissions(user, view_channel=None)
+        await channel.send(f"{user.mention} has been un-temp-banned.")
+        
+
+async def panelMute(rawEventData, bot):
+    channel = bot.get_channel(rawEventData.channel_id)
+    guild = bot.get_guild(rawEventData.guild_id)
+    guildID = rawEventData.guild_id
+    
+    try:
+        message = await bot.wait_for('message', timeout = 180)
+        
+    except asyncio.TimeoutError:
+        await GUIS.purgeChannel(rawEventData, bot)
+    
+    else:
+        messageContent = message.content
+        parts = re.split("#| ",messageContent)
+        userName = parts[0]
+        discriminator = parts[1]
+        user = ''
+        
+    async for member in guild.fetch_members():
+        if str(member.name) == userName and str(member.discriminator) == discriminator:
+            server_object = fm.getServerData(guildID)
+            strikeDict = server_object["strikes"]
+            user = member
+            if str(user) in strikeDict:
+                strikeDict[str(user)] -= 1000
+            else:
+                strikeDict[str(user)] = -1000
+            fm.storeServerData(server_object)
+            break
+            
+    for channelPoint in guild.channels: #interates over all channels in server
+        if isinstance(channelPoint, discord.TextChannel): #if the channel is a text channel
+            await channelPoint.set_permissions(user, send_messages=False) #mutes member from writing
+        elif isinstance(channelPoint, discord.VoiceChannel): #if the channel is a voice channel
+            await channelPoint.set_permissions(user, connect=False) #prevents member from joingin
+    # Redundant maybe? If you mute 2 or 3 members it becomes really annoying
+    # to scroll back up to the panel to use itg
+    await channel.send(f"{user.mention} has been muted") #Bot Message
+    
+    
+async def panelUnMute(rawEventData, bot):
+    channel = bot.get_channel(rawEventData.channel_id)
+    guild = bot.get_guild(rawEventData.guild_id)
+    guildID = rawEventData.guild_id
+    
+    try:
+        message = await bot.wait_for('message', timeout = 180)
+        
+    except asyncio.TimeoutError:
+        await GUIS.purgeChannel(rawEventData, bot)
+    
+    else:
+        messageContent = message.content
+        parts = re.split("#| ",messageContent)
+        userName = parts[0]
+        discriminator = parts[1]
+        user = ''
+        
+    async for member in guild.fetch_members():
+        if str(member.name) == userName and str(member.discriminator) == discriminator:
+            server_object = fm.getServerData(guildID)
+            strikeDict = server_object["strikes"]
+            user = member
+            strikeDict[str(user)] += 1000
+            fm.storeServerData(server_object)
+            break
+            
+    for channelPoint in guild.channels: #interates over all channels in server
+        if isinstance(channelPoint, discord.TextChannel): #if the channel is a text channel
+            await channelPoint.set_permissions(user, send_messages=None) #mutes member from writing
+        elif isinstance(channelPoint, discord.VoiceChannel): #if the channel is a voice channel
+            await channelPoint.set_permissions(user, connect=None) #prevents member from joinging
+    # Redundant maybe? If you unmute 2 or 3 members it becomes really annoying
+    # to scroll back up to the panel to use it
+    # await channel.send(f"{user.mention} has been unmuted") #Bot Message

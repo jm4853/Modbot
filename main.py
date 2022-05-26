@@ -9,10 +9,11 @@
 # they correspond to. At the bottom of this script, you will find a
 # bot.run() call. In order to use this code, you will need to create your
 # own bot applications through the Discord developer portal:
+# https://discord.com/developers/docs/intro
 #
 # Once you have created a bot application, you will be able to take its
-# token, and paste it into the bot.run() call. The to turn on the bot
-# simply run this file.
+# token, and paste it into the bot.run() call (at the end of this file).
+# To turn on the bot simply run this file (main.py).
 #
 # Guild and server might be used interchangably throughout this code,
 # however its important to note that the correct term is guild.
@@ -32,9 +33,11 @@
 import discord
 import roles
 import events
+import GUIS
 import channelbot as chnls
 import discipline as dspln
 import modFileManager as fm
+from Help_Command import initHelp
 # Another component of the API wrapper that allows us to use the
 # bot.command() wrapper
 from discord.ext import commands
@@ -98,6 +101,12 @@ async def on_member_remove(member):
 @bot.event
 async def on_raw_reaction_add(rawEventData):
     await events.on_raw_reaction_add(rawEventData, bot)
+
+# Help command
+# The help command is actually a default behavior
+# and does not need a bot.command() decorator, instead
+# it just needs to be initialized
+initHelp(bot)
 
 
 # -----------------------
@@ -197,6 +206,10 @@ async def moveVoiceC(ctx, channel: discord.VoiceChannel, category: discord.Categ
 @bot.command(pass_context=True)
 async def limitVoiceChannel(ctx: commands.Context, channel: discord.VoiceChannel, limit: int):
     await chnls.limitVoiceChannel(ctx, channel, limit)
+    
+@bot.command(pass_context=True)
+async def sendHomePanel(ctx):
+    await GUIS.sendHomePanel(ctx.channel)
 
 
 # -----------------------
@@ -245,7 +258,8 @@ async def tempBan(ctx, user: discord.Member, days: float=1):
 @bot.command()
 async def unTempBan(ctx, user: discord.Member):
     await dspln.unTempBan(ctx, user)
+    
+    
 
-print("Before run")
-bot.run('''Enter your bots key here''')
-print("After Run")
+
+bot.run('''Put your bot token here''')

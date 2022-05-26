@@ -32,7 +32,7 @@ async def on_guild_join(guild):
     fm.addServer(guild.id, messageID)
     for channel in guild.text_channels:
         if channel.permissions_for(guild.me).send_messages:
-            await channel.send("I hath arrived.")
+            await channel.send("Hello! I am ModBot.io. For additional help with text commands type '$help'")
         break
 
 

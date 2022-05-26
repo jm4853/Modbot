@@ -31,7 +31,7 @@ def addServer(server, homeID):
 def getServerData(server):
     with open("data.txt", 'r') as file_object:
         serverList = json.load(file_object)
-    print(serverList)
+    #print(serverList)
     return serverList[str(server)]
 
 # Stores the data passed in to the data file
