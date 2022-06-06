@@ -9,3 +9,5 @@ application through the Discord developer portal and install discord.py. The bot
 application's token and then running main.py.
 
 For support you can contact Jake at: jm4853@drexel.edu
+
+Discord.py: https://discordpy.readthedocs.io/en/stable/intro.html
